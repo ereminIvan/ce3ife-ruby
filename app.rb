@@ -1,3 +1,4 @@
+##cli
 class Point
   attr_reader :x_pos,:y_pos
 
@@ -23,7 +24,7 @@ end
 class ServiceLine
   # attr_reader :intersect
 
-  def intersect(line_1, line_2)
+  def self.intersect(line_1, line_2)
     a1 = line_1.start_point
     a2 = line_1.end_point
     b1 = line_2.start_point
@@ -47,15 +48,69 @@ class ServiceLine
   end
 end
 
+# matrix [m - rows, n - columns,]  2 - rows, 3 - column
+# 0 1 0
+# 0 1 0
+class Matrix
+  attr_reader :columns_count, :rows_count
+
+  def initialize(matrix)
+    if matrix.instance_of?(Array) && matrix.at(0).instance_of?(Array)
+      @matrix = matrix
+      @rows_count = matrix.count
+      @columns_count = matrix[0].count
+    end
+  end
+end
+
+class ServiceMatrix
+  def self.random(m = nil, n = nil, lim_from = nil, lim_to = nil)
+    r = Random.new
+    m = m.nil? || m == 0 ? r.rand(1..10) : m
+    n = n.nil? || m == 0 ? r.rand(1..10) : n
+    lim_from = lim_from.nil? ? r.rand(-10 .. 0) : lim_from
+    lim_to = lim_to.nil? ? r.rand(0 .. 10) : lim_to
+    return Matrix.new(Array.new(m){Array.new(n){r.rand(lim_from..lim_to)}})
+  end
+end
+
+
+puts "\nTEST: Matrix: creation"
+puts '---------------------------------------------'
+[
+    [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    [[0, 1, 0], [0, 1, 0]],
+].each do |pool|
+  matrix = Matrix.new(pool)
+  puts pool.inspect
+  puts matrix.inspect
+end
+
+puts "\nTEST: ServiceMatrix: random Matrix creation"
+puts '---------------------------------------------'
+[
+  [1, 2],
+  [2, 1],
+  [0, nil],
+  [nil, nil],
+  [nil, nil, 0, 1],
+  [3, 3, 1, 1],
+  [3, 3, 0, 1],
+].each do |m, n, lim_from, lim_to|
+  puts "\nm rows=#{m}, n columns=#{n}, lim_from=#{lim_from}, lim_to=#{lim_to}"
+  puts ServiceMatrix.random(m, n, lim_from, lim_to).inspect
+end
+
 #Test ServiceLine
-check_lines = [
+puts "\nTEST: ServiceLine: intersection checking"
+puts '---------------------------------------------'
+[
   [[-2, -1], [8, 4], [4, 5], [6, 3]], #true
   [[-2, -1], [8, 4], [4, 5], [5, 4]], #false
-]
-
-check_lines.each do |points|
-  puts ServiceLine.new.intersect(
+].each do |points|
+  print 'Line: ', points.inspect
+  puts ServiceLine.intersect(
       Line.new(Point.new(points[0][0], points[0][1]), Point.new(points[1][0], points[1][1])),
       Line.new(Point.new(points[2][0], points[2][1]), Point.new(points[3][0], points[3][1])),
-  )
+  ).inspect
 end
